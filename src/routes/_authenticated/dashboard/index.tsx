@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +18,7 @@ function DashboardPage() {
   const { user } = Route.useRouteContext();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<string[]>([]);
+  const [studentCount, setStudentCount] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -27,6 +28,11 @@ function DashboardPage() {
       ]);
       setProfile(prof as Profile | null);
       setRoles(((roleRows as RoleRow[] | null) ?? []).map((r) => r.role));
+      const { count } = await supabase
+        .from("students")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "active");
+      setStudentCount(count ?? 0);
     })();
   }, [user.id]);
 
@@ -34,7 +40,7 @@ function DashboardPage() {
   const primaryRole = roles[0] ?? "student";
 
   const stats = [
-    { label: "Total Students", value: "1,248", icon: Users2, accent: "text-brand-navy", trend: "+24 this term" },
+    { label: "Total Students", value: studentCount === null ? "—" : String(studentCount), icon: Users2, accent: "text-brand-navy", trend: "Active enrolment" },
     { label: "Attendance", value: "94.2%", icon: ClipboardCheck, accent: "text-emerald-600", trend: "+2.4% vs yesterday" },
     { label: "Fee Collection", value: "82%", icon: Wallet, accent: "text-brand-gold", trend: "₹4.2M collected" },
     { label: "Faculty", value: "85", icon: GraduationCap, accent: "text-brand-navy", trend: "12 departments" },
@@ -116,14 +122,18 @@ function DashboardPage() {
 
       <div className="mt-8 bg-brand-navy text-white rounded-xl p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h3 className="font-serif text-xl mb-1">More modules coming soon</h3>
+          <h3 className="font-serif text-xl mb-1">Student Management is live</h3>
           <p className="text-white/60 text-sm">
-            Attendance, exams, fee management, LMS, library, transport, and hostel modules are being rolled out in phases.
+            Admissions, profiles, class allocation, and guardian records are ready. Attendance, exams, fees, and LMS follow next.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] uppercase tracking-widest text-brand-gold font-bold">Phase 1</span>
-          <span className="text-[10px] uppercase tracking-widest text-white/40">/ Auth & Foundation</span>
+          <Link
+            to="/dashboard/students"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-sm bg-brand-gold text-brand-navy text-sm font-semibold hover:bg-brand-gold/90"
+          >
+            Open Students
+          </Link>
         </div>
       </div>
     </DashboardLayout>
