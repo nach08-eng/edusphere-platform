@@ -18,14 +18,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
 const nav = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/dashboard/students", label: "Students", icon: Users2 },
-  { to: "/dashboard/teachers", label: "Teachers", icon: GraduationCap },
-  { to: "/dashboard/academics", label: "Academics", icon: BookOpen },
-  { to: "/dashboard/attendance", label: "Attendance", icon: ClipboardCheck },
-  { to: "/dashboard/finance", label: "Finance", icon: Wallet },
-  { to: "/dashboard/reports", label: "Reports", icon: BarChart3 },
+  { module: null, label: "Dashboard", icon: LayoutDashboard },
+  { module: "students", label: "Students", icon: Users2 },
+  { module: "teachers", label: "Teachers", icon: GraduationCap },
+  { module: "academics", label: "Academics", icon: BookOpen },
+  { module: "attendance", label: "Attendance", icon: ClipboardCheck },
+  { module: "finance", label: "Finance", icon: Wallet },
+  { module: "reports", label: "Reports", icon: BarChart3 },
 ] as const;
+
 
 export function DashboardLayout({
   children,
@@ -89,22 +90,34 @@ export function DashboardLayout({
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {nav.map((item) => {
-            const active = pathname === item.to;
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={
-                  active
-                    ? "flex items-center gap-3 px-3 py-2.5 bg-brand-navy text-white rounded-md text-sm font-medium"
-                    : "flex items-center gap-3 px-3 py-2.5 text-brand-navy/60 hover:bg-brand-sand rounded-md text-sm font-medium transition-colors"
-                }
-              >
+            const href = item.module ? `/dashboard/${item.module}` : "/dashboard";
+            const active = pathname === href;
+            const className = active
+              ? "flex items-center gap-3 px-3 py-2.5 bg-brand-navy text-white rounded-md text-sm font-medium"
+              : "flex items-center gap-3 px-3 py-2.5 text-brand-navy/60 hover:bg-brand-sand rounded-md text-sm font-medium transition-colors";
+            const inner = (
+              <>
                 <item.icon className="size-4 shrink-0" />
                 {item.label}
+              </>
+            );
+            return item.module ? (
+              <Link
+                key={href}
+                to="/dashboard/$module"
+                params={{ module: item.module }}
+                className={className}
+                onClick={() => setMobileOpen(false)}
+              >
+                {inner}
+              </Link>
+            ) : (
+              <Link key={href} to="/dashboard" className={className} onClick={() => setMobileOpen(false)}>
+                {inner}
               </Link>
             );
           })}
+
         </nav>
 
         <div className="p-4 border-t border-brand-navy/5">
