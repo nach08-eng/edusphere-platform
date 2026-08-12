@@ -20,6 +20,8 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
 import { Route as AuthenticatedDashboardModuleRouteImport } from './routes/_authenticated/dashboard/$module'
+import { Route as AuthenticatedDashboardStudentsIndexRouteImport } from './routes/_authenticated/dashboard/students/index'
+import { Route as AuthenticatedDashboardStudentsStudentIdRouteImport } from './routes/_authenticated/dashboard/students/$studentId'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -77,6 +79,18 @@ const AuthenticatedDashboardModuleRoute =
     path: '/dashboard/$module',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardStudentsIndexRoute =
+  AuthenticatedDashboardStudentsIndexRouteImport.update({
+    id: '/dashboard/students/',
+    path: '/dashboard/students/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardStudentsStudentIdRoute =
+  AuthenticatedDashboardStudentsStudentIdRouteImport.update({
+    id: '/dashboard/students/$studentId',
+    path: '/dashboard/students/$studentId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,6 +103,8 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard/$module': typeof AuthenticatedDashboardModuleRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/dashboard/students/$studentId': typeof AuthenticatedDashboardStudentsStudentIdRoute
+  '/dashboard/students/': typeof AuthenticatedDashboardStudentsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -101,6 +117,8 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard/$module': typeof AuthenticatedDashboardModuleRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/dashboard/students/$studentId': typeof AuthenticatedDashboardStudentsStudentIdRoute
+  '/dashboard/students': typeof AuthenticatedDashboardStudentsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -115,6 +133,8 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/dashboard/$module': typeof AuthenticatedDashboardModuleRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/_authenticated/dashboard/students/$studentId': typeof AuthenticatedDashboardStudentsStudentIdRoute
+  '/_authenticated/dashboard/students/': typeof AuthenticatedDashboardStudentsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -129,6 +149,8 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/dashboard/$module'
     | '/dashboard/'
+    | '/dashboard/students/$studentId'
+    | '/dashboard/students/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -141,6 +163,8 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/dashboard/$module'
     | '/dashboard'
+    | '/dashboard/students/$studentId'
+    | '/dashboard/students'
   id:
     | '__root__'
     | '/'
@@ -154,6 +178,8 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/_authenticated/dashboard/$module'
     | '/_authenticated/dashboard/'
+    | '/_authenticated/dashboard/students/$studentId'
+    | '/_authenticated/dashboard/students/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -247,17 +273,37 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardModuleRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/students/': {
+      id: '/_authenticated/dashboard/students/'
+      path: '/dashboard/students'
+      fullPath: '/dashboard/students/'
+      preLoaderRoute: typeof AuthenticatedDashboardStudentsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/students/$studentId': {
+      id: '/_authenticated/dashboard/students/$studentId'
+      path: '/dashboard/students/$studentId'
+      fullPath: '/dashboard/students/$studentId'
+      preLoaderRoute: typeof AuthenticatedDashboardStudentsStudentIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardModuleRoute: typeof AuthenticatedDashboardModuleRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
+  AuthenticatedDashboardStudentsStudentIdRoute: typeof AuthenticatedDashboardStudentsStudentIdRoute
+  AuthenticatedDashboardStudentsIndexRoute: typeof AuthenticatedDashboardStudentsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardModuleRoute: AuthenticatedDashboardModuleRoute,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+  AuthenticatedDashboardStudentsStudentIdRoute:
+    AuthenticatedDashboardStudentsStudentIdRoute,
+  AuthenticatedDashboardStudentsIndexRoute:
+    AuthenticatedDashboardStudentsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
