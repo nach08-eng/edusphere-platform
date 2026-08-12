@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      classes: {
+        Row: {
+          academic_year: string
+          class_teacher: string | null
+          created_at: string
+          id: string
+          name: string
+          room: string | null
+          section: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year?: string
+          class_teacher?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          room?: string | null
+          section?: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string
+          class_teacher?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          room?: string | null
+          section?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -43,6 +76,77 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      students: {
+        Row: {
+          address: string | null
+          admission_date: string
+          admission_no: string
+          blood_group: string | null
+          class_id: string | null
+          created_at: string
+          date_of_birth: string | null
+          full_name: string
+          gender: Database["public"]["Enums"]["gender"] | null
+          guardian_email: string | null
+          guardian_name: string | null
+          guardian_phone: string | null
+          id: string
+          photo_url: string | null
+          roll_no: number | null
+          status: Database["public"]["Enums"]["student_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          admission_date?: string
+          admission_no: string
+          blood_group?: string | null
+          class_id?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          full_name: string
+          gender?: Database["public"]["Enums"]["gender"] | null
+          guardian_email?: string | null
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          id?: string
+          photo_url?: string | null
+          roll_no?: number | null
+          status?: Database["public"]["Enums"]["student_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          admission_date?: string
+          admission_no?: string
+          blood_group?: string | null
+          class_id?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          full_name?: string
+          gender?: Database["public"]["Enums"]["gender"] | null
+          guardian_email?: string | null
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          id?: string
+          photo_url?: string | null
+          roll_no?: number | null
+          status?: Database["public"]["Enums"]["student_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -77,6 +181,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role:
@@ -88,6 +194,8 @@ export type Database = {
         | "accountant"
         | "librarian"
         | "transport_manager"
+      gender: "male" | "female" | "other"
+      student_status: "active" | "alumni" | "transferred" | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -225,6 +333,8 @@ export const Constants = {
         "librarian",
         "transport_manager",
       ],
+      gender: ["male", "female", "other"],
+      student_status: ["active", "alumni", "transferred", "suspended"],
     },
   },
 } as const
