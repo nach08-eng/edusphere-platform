@@ -2,15 +2,18 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CalendarDays, CheckCircle2, Radio, Users2, Download } from "lucide-react";
+import { CalendarDays, CheckCircle2, Radio, Users2, Download, History } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { classesQuery, classLabel, myRolesQuery } from "@/lib/students";
 import {
   ATTENDANCE_STATUSES,
   PERIODS,
+  auditActionLabel,
+  auditLogQuery,
   classStudentsQuery,
   ensureSession,
+  formatAuditTime,
   recentSessionsQuery,
   recordsQuery,
   sessionQuery,
