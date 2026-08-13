@@ -85,6 +85,62 @@ export const recentSessionsQuery = (classId: string) => ({
   },
 });
 
+export type AuditEntry = Tables<"attendance_audit_log"> & {
+  student_name: string | null;
+  changed_by_name: string | null;
+};
+
+export const auditLogQuery = (sessionId: string | null | undefined) => ({
+  queryKey: ["attendance-audit", sessionId],
+  enabled: !!sessionId,
+  queryFn: async (): Promise<AuditEntry[]> => {
+    const { data, error } = await supabase
+      .from("attendance_audit_log")
+      .select("*")
+      .eq("session_id", sessionId as string)
+      .order("changed_at", { ascending: false })
+      .limit(100);
+    if (error) throw error;
+    const rows = data ?? [];
+    if (!rows.length) return [];
+
+    const studentIds = [...new Set(rows.map((r) => r.student_id))];
+    const actorIds = [...new Set(rows.map((r) => r.changed_by).filter(Boolean))] as string[];
+
+    const [{ data: students }, { data: actors }] = await Promise.all([
+      supabase.from("students").select("id, full_name").in("id", studentIds),
+      actorIds.length
+        ? supabase.from("profiles").select("id, full_name, email").in("id", actorIds)
+        : Promise.resolve({ data: [] as { id: string; full_name: string | null; email: string | null }[] }),
+    ]);
+
+    const studentMap = new Map((students ?? []).map((s) => [s.id, s.full_name]));
+    const actorMap = new Map((actors ?? []).map((p) => [p.id, p.full_name || p.email]));
+
+    return rows.map((r) => ({
+      ...r,
+      student_name: studentMap.get(r.student_id) ?? null,
+      changed_by_name: r.changed_by ? (actorMap.get(r.changed_by) ?? null) : null,
+    }));
+  },
+});
+
+export const auditActionLabel: Record<string, string> = {
+  marked: "Marked",
+  changed: "Changed",
+  removed: "Removed",
+};
+
+export const formatAuditTime = (iso: string) =>
+  new Date(iso).toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
 export async function ensureSession(classId: string, date: string, period: string, userId: string) {
   const { data: existing, error: selErr } = await supabase
     .from("attendance_sessions")
