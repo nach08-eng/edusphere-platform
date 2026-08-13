@@ -60,6 +60,7 @@ function AttendancePage() {
   const sessionId = session.data?.id ?? null;
   const records = useQuery(recordsQuery(sessionId));
   const recent = useQuery(recentSessionsQuery(classId));
+  const audit = useQuery(auditLogQuery(sessionId));
 
   /* ---- realtime ---- */
   useEffect(() => {
@@ -72,11 +73,15 @@ function AttendancePage() {
         () => {
           qc.invalidateQueries({ queryKey: ["attendance-session", classId] });
           qc.invalidateQueries({ queryKey: ["attendance-recent", classId] });
+        qc.invalidateQueries({ queryKey: ["attendance-audit"] });
+      qc.invalidateQueries({ queryKey: ["attendance-audit"] });
         },
       )
       .on("postgres_changes", { event: "*", schema: "public", table: "attendance_records" }, () => {
         qc.invalidateQueries({ queryKey: ["attendance-records"] });
         qc.invalidateQueries({ queryKey: ["attendance-recent", classId] });
+        qc.invalidateQueries({ queryKey: ["attendance-audit"] });
+      qc.invalidateQueries({ queryKey: ["attendance-audit"] });
       })
       .subscribe();
     return () => {
@@ -117,6 +122,7 @@ function AttendancePage() {
       qc.invalidateQueries({ queryKey: ["attendance-session", classId] });
       qc.invalidateQueries({ queryKey: ["attendance-records"] });
       qc.invalidateQueries({ queryKey: ["attendance-recent", classId] });
+      qc.invalidateQueries({ queryKey: ["attendance-audit"] });
     },
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Could not save attendance"),
   });
@@ -141,6 +147,7 @@ function AttendancePage() {
       qc.invalidateQueries({ queryKey: ["attendance-session", classId] });
       qc.invalidateQueries({ queryKey: ["attendance-records"] });
       qc.invalidateQueries({ queryKey: ["attendance-recent", classId] });
+      qc.invalidateQueries({ queryKey: ["attendance-audit"] });
     },
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Could not save attendance"),
   });
