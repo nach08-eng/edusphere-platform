@@ -73,15 +73,12 @@ function AttendancePage() {
         () => {
           qc.invalidateQueries({ queryKey: ["attendance-session", classId] });
           qc.invalidateQueries({ queryKey: ["attendance-recent", classId] });
-        qc.invalidateQueries({ queryKey: ["attendance-audit"] });
-      qc.invalidateQueries({ queryKey: ["attendance-audit"] });
         },
       )
       .on("postgres_changes", { event: "*", schema: "public", table: "attendance_records" }, () => {
         qc.invalidateQueries({ queryKey: ["attendance-records"] });
         qc.invalidateQueries({ queryKey: ["attendance-recent", classId] });
         qc.invalidateQueries({ queryKey: ["attendance-audit"] });
-      qc.invalidateQueries({ queryKey: ["attendance-audit"] });
       })
       .subscribe();
     return () => {
