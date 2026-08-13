@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      attendance_audit_log: {
+        Row: {
+          action: Database["public"]["Enums"]["audit_action"]
+          changed_at: string
+          changed_by: string | null
+          id: string
+          new_status: Database["public"]["Enums"]["attendance_status"] | null
+          old_status: Database["public"]["Enums"]["attendance_status"] | null
+          record_id: string | null
+          session_id: string
+          student_id: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["audit_action"]
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_status?: Database["public"]["Enums"]["attendance_status"] | null
+          old_status?: Database["public"]["Enums"]["attendance_status"] | null
+          record_id?: string | null
+          session_id: string
+          student_id: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["audit_action"]
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_status?: Database["public"]["Enums"]["attendance_status"] | null
+          old_status?: Database["public"]["Enums"]["attendance_status"] | null
+          record_id?: string | null
+          session_id?: string
+          student_id?: string
+        }
+        Relationships: []
+      }
       attendance_records: {
         Row: {
           created_at: string
@@ -284,6 +320,7 @@ export type Database = {
         | "librarian"
         | "transport_manager"
       attendance_status: "present" | "absent" | "late" | "excused"
+      audit_action: "marked" | "changed" | "removed"
       gender: "male" | "female" | "other"
       student_status: "active" | "alumni" | "transferred" | "suspended"
     }
@@ -424,6 +461,7 @@ export const Constants = {
         "transport_manager",
       ],
       attendance_status: ["present", "absent", "late", "excused"],
+      audit_action: ["marked", "changed", "removed"],
       gender: ["male", "female", "other"],
       student_status: ["active", "alumni", "transferred", "suspended"],
     },

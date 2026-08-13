@@ -2,15 +2,18 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CalendarDays, CheckCircle2, Radio, Users2, Download } from "lucide-react";
+import { CalendarDays, CheckCircle2, Radio, Users2, Download, History } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { classesQuery, classLabel, myRolesQuery } from "@/lib/students";
 import {
   ATTENDANCE_STATUSES,
   PERIODS,
+  auditActionLabel,
+  auditLogQuery,
   classStudentsQuery,
   ensureSession,
+  formatAuditTime,
   recentSessionsQuery,
   recordsQuery,
   sessionQuery,
@@ -57,6 +60,7 @@ function AttendancePage() {
   const sessionId = session.data?.id ?? null;
   const records = useQuery(recordsQuery(sessionId));
   const recent = useQuery(recentSessionsQuery(classId));
+  const audit = useQuery(auditLogQuery(sessionId));
 
   /* ---- realtime ---- */
   useEffect(() => {
@@ -74,6 +78,7 @@ function AttendancePage() {
       .on("postgres_changes", { event: "*", schema: "public", table: "attendance_records" }, () => {
         qc.invalidateQueries({ queryKey: ["attendance-records"] });
         qc.invalidateQueries({ queryKey: ["attendance-recent", classId] });
+        qc.invalidateQueries({ queryKey: ["attendance-audit"] });
       })
       .subscribe();
     return () => {
@@ -114,6 +119,7 @@ function AttendancePage() {
       qc.invalidateQueries({ queryKey: ["attendance-session", classId] });
       qc.invalidateQueries({ queryKey: ["attendance-records"] });
       qc.invalidateQueries({ queryKey: ["attendance-recent", classId] });
+      qc.invalidateQueries({ queryKey: ["attendance-audit"] });
     },
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Could not save attendance"),
   });
@@ -138,6 +144,7 @@ function AttendancePage() {
       qc.invalidateQueries({ queryKey: ["attendance-session", classId] });
       qc.invalidateQueries({ queryKey: ["attendance-records"] });
       qc.invalidateQueries({ queryKey: ["attendance-recent", classId] });
+      qc.invalidateQueries({ queryKey: ["attendance-audit"] });
     },
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Could not save attendance"),
   });
@@ -311,6 +318,70 @@ function AttendancePage() {
             );
           })}
         </ul>
+      </div>
+
+      {/* Audit trail */}
+      <div className="bg-white rounded-xl border border-brand-navy/5 overflow-hidden mb-6">
+        <div className="px-4 py-3 border-b border-brand-navy/5 flex items-center gap-2">
+          <History className="size-4 text-brand-navy/40" />
+          <p className="text-[10px] uppercase tracking-widest text-brand-navy/40 font-bold">
+            Audit trail · {date} · {period}
+          </p>
+          {audit.data?.length ? (
+            <span className="text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded bg-brand-sand text-brand-navy/60">
+              {audit.data.length} {audit.data.length === 1 ? "entry" : "entries"}
+            </span>
+          ) : null}
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-[10px] uppercase tracking-widest text-brand-navy/40 font-bold border-b border-brand-navy/5">
+                <th className="px-4 py-3">When</th>
+                <th className="px-4 py-3">Student</th>
+                <th className="px-4 py-3">Change</th>
+                <th className="px-4 py-3">By</th>
+              </tr>
+            </thead>
+            <tbody>
+              {!sessionId || (audit.data ?? []).length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-4 py-10 text-center text-brand-navy/50">
+                    {audit.isLoading ? "Loading audit trail…" : "No changes recorded for this session yet."}
+                  </td>
+                </tr>
+              ) : (
+                (audit.data ?? []).map((a) => (
+                  <tr key={a.id} className="border-b border-brand-navy/5 last:border-0">
+                    <td className="px-4 py-3 text-brand-navy/70 whitespace-nowrap">{formatAuditTime(a.changed_at)}</td>
+                    <td className="px-4 py-3 text-brand-navy">{a.student_name ?? "—"}</td>
+                    <td className="px-4 py-3">
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-brand-navy/50 mr-2">
+                        {auditActionLabel[a.action] ?? a.action}
+                      </span>
+                      {a.old_status && (
+                        <>
+                          <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded ${statusChip[a.old_status]}`}>
+                            {a.old_status}
+                          </span>
+                          <span className="mx-1.5 text-brand-navy/30">→</span>
+                        </>
+                      )}
+                      <span
+                        className={`text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded ${
+                          a.new_status ? statusChip[a.new_status] : "bg-brand-sand text-brand-navy/40"
+                        }`}
+                      >
+                        {a.new_status ?? "removed"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-brand-navy/70">{a.changed_by_name ?? "System"}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Recent sessions */}
