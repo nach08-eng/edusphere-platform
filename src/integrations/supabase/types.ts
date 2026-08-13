@@ -14,6 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
+      attendance_records: {
+        Row: {
+          created_at: string
+          id: string
+          marked_by: string | null
+          remarks: string | null
+          session_id: string
+          status: Database["public"]["Enums"]["attendance_status"]
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          marked_by?: string | null
+          remarks?: string | null
+          session_id: string
+          status?: Database["public"]["Enums"]["attendance_status"]
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          marked_by?: string | null
+          remarks?: string | null
+          session_id?: string
+          status?: Database["public"]["Enums"]["attendance_status"]
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "attendance_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_records_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_sessions: {
+        Row: {
+          class_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          period: string
+          session_date: string
+          taken_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          period?: string
+          session_date?: string
+          taken_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          period?: string
+          session_date?: string
+          taken_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_sessions_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       classes: {
         Row: {
           academic_year: string
@@ -194,6 +283,7 @@ export type Database = {
         | "accountant"
         | "librarian"
         | "transport_manager"
+      attendance_status: "present" | "absent" | "late" | "excused"
       gender: "male" | "female" | "other"
       student_status: "active" | "alumni" | "transferred" | "suspended"
     }
@@ -333,6 +423,7 @@ export const Constants = {
         "librarian",
         "transport_manager",
       ],
+      attendance_status: ["present", "absent", "late", "excused"],
       gender: ["male", "female", "other"],
       student_status: ["active", "alumni", "transferred", "suspended"],
     },
