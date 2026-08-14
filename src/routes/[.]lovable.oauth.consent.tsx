@@ -2,6 +2,13 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+function redirectTarget(data: unknown): string | undefined {
+  if (!data || typeof data !== "object") return undefined;
+  const record = data as Record<string, unknown>;
+  const target = record.redirect_url ?? record.redirect_to;
+  return typeof target === "string" ? target : undefined;
+}
+
 export const Route = createFileRoute("/.lovable/oauth/consent")({
   ssr: false,
   validateSearch: (s: Record<string, unknown>) => ({
@@ -17,8 +24,8 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
     const authorizationId = new URLSearchParams(location.search).get("authorization_id")!;
     const { data, error } = await supabase.auth.oauth.getAuthorizationDetails(authorizationId);
     if (error) throw error;
-    const immediate = data?.redirect_url ?? data?.redirect_to;
-    if (immediate && !data?.client) throw redirect({ href: immediate });
+    const immediate = redirectTarget(data);
+    if (immediate && !("client" in (data ?? {}))) throw redirect({ href: immediate });
     return data;
   },
   component: Consent,
@@ -40,7 +47,7 @@ function Consent() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const clientName = details?.client?.name ?? "an app";
+  const clientName = (details && "client" in details ? details.client?.name : null) ?? "an app";
 
   async function decide(approve: boolean) {
     setBusy(true);
@@ -53,7 +60,7 @@ function Consent() {
       setError(error.message);
       return;
     }
-    const target = data?.redirect_url ?? data?.redirect_to;
+    const target = redirectTarget(data);
     if (!target) {
       setBusy(false);
       setError("No redirect returned by the authorization server.");
