@@ -12,11 +12,13 @@ export const Route = createFileRoute("/auth")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  validateSearch: (search: Record<string, unknown>) => ({
-    next: typeof search.next === "string" && search.next.startsWith("/") && !search.next.startsWith("//")
-      ? search.next
-      : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { next?: string } => {
+    const next = search.next;
+    if (typeof next === "string" && next.startsWith("/") && !next.startsWith("//")) {
+      return { next };
+    }
+    return {};
+  },
   component: AuthPage,
 });
 
